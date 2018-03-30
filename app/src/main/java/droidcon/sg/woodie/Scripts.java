@@ -7,5 +7,5 @@ import java.util.Map;
  */
 
 public class Scripts {
-    public Map<String,ActionGroup[]> scripts;
+    public Map<String,ActionFrame[]> scripts;
 }

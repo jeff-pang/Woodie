@@ -55,7 +55,26 @@ public class DxlVector {
             d=0;
         }
 
-        float gp=Math.round((1023.0/300.0) * d);
+        float constant = 3.4f;
+        float gp = 3.4f * d;
         return (int)gp;
+    }
+
+    public static int UnitToDegrees(int goal)
+    {
+        float pc = (float)goal / 1023f;
+        float p = roundUp(pc * 300);
+        int degrees = (int)p - 150;
+        return degrees;
+    }
+
+    private static float roundDown (float value) {
+        float v = Math.round(value - 0.5f);
+        return v;
+    }
+
+    private static float roundUp (float value) {
+        float v = Math.round(value + 0.5f);
+        return v;
     }
 }

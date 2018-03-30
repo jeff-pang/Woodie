@@ -12,7 +12,10 @@ import com.google.gson.JsonElement;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
  * Skeleton of an Android Things activity.
@@ -39,27 +42,38 @@ public class MainActivity extends Activity {
     Scripts mScripts;
     private static final String TAG = "MainActivity";
 
+    DxlSync mSync;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mScripts=loadJSONFromAsset();
 
         mDevice = initialiseUsb();
-
+        mSync=new DxlSync(mDevice);
         if(mScripts !=null && mScripts.scripts!=null)
         {
             Log.i(TAG,"Running script 'wavehello'");
-            ActionGroup[] groups = mScripts.scripts.get("wavehello");
+            ActionFrame[] frames = mScripts.scripts.get("wavehello");
 
-            DxlRunner runner = new DxlRunner(mDevice,groups);
+            DxlRunner runner = new DxlRunner(mDevice,frames[0]);
             new Thread(runner).start();
+
+            DxlVector[] vectors=frames[0].vectors;
+
+            if(vectors!=null) {
+                for (DxlVector dxl : vectors) {
+                    DxlQuery q=new DxlQuery(dxl.id,dxl.position);
+                    mSync.AddQueue(q);
+                }
+            }
         }
         else
         {
             Log.i(TAG,"Script is null");
         }
     }
-
 
     Scripts loadJSONFromAsset() {
         String json = null;
@@ -106,6 +120,7 @@ public class MainActivity extends Activity {
                     break;
                 }
             }
+
             if (usbName != null && !usbName.isEmpty()) {
                 try {
                     Log.i(TAG, "Aquiring usb " + usbName);

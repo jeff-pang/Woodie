@@ -4,6 +4,16 @@ import android.os.SystemClock;
 import android.util.Log;
 import com.google.android.things.pio.UartDevice;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by jeff on 25/3/18.
@@ -14,30 +24,25 @@ public class DxlRunner implements Runnable{
     private static final String TAG = "DxlRunner";
 
     UartDevice mUsb;
-    ActionGroup[] mScript;
+    ActionFrame mFrame;
 
-    DxlRunner(UartDevice usbDevice,ActionGroup[] script) {
+    DxlRunner(UartDevice usbDevice,ActionFrame frame) {
 
         mUsb=usbDevice;
-        mScript = script;
+        mFrame = frame;
     }
 
     public void run() {
-        runScript(mScript);
+        runScript(mFrame);
     }
 
-    void runScript(ActionGroup[] group) {
+    private int x=0;
+    void runScript(ActionFrame frame) {
 
-        if (group != null) {
-
-            for(int x=0;x<group.length;x++)
-            {
-                DxlVector[] vect =group[x].vectors;
-                for (DxlVector dxl : vect) {
-
-                    runVectors(vect);
-                }
-            }
+        if (frame != null) {
+            x=0;
+            ArrayList<Integer> completed=new ArrayList<>();
+            runVectors(frame.vectors);
         }
         else
         {
@@ -51,57 +56,33 @@ public class DxlRunner implements Runnable{
 
                 int powerUnit = DxlVector.PowerToUnit(dxl.power);
                 int posUnit = DxlVector.DegreesToUnit(dxl.position);
-                moveDxl(mUsb, dxl.id, posUnit, powerUnit);
+                moveDxl(dxl.id, posUnit, powerUnit);
+                SystemClock.sleep(100);
                 SystemClock.sleep(100);
             }
         }
     }
-    void moveDxl(UartDevice device,int id,int positionUnit,int powerUnit)
+
+    void moveDxl(int id,int positionUnit,int powerUnit)
     {
-        if(device!=null) {
-            try {
+        if(mUsb!=null) {
 
-                byte cmd =0;
-                byte reqid=0;
+            byte cmd =0;
+            byte reqid=0;
 
-                byte[] bPos = toBytes(positionUnit);
-                byte[] bPower = toBytes(powerUnit);
-                byte[] buffer = {cmd,reqid,(byte) id, bPos[0], bPos[1], bPower[0], bPower[1]};
+            byte[] bPos = DxlHelper.toBytes(positionUnit);
+            byte[] bPower = DxlHelper.toBytes(powerUnit);
+            byte[] buffer = {cmd,reqid,(byte) id, bPos[0], bPos[1], bPower[0], bPower[1]};
 
-                Log.i(TAG, "b[0]="+buffer[0]+",b[1]="+buffer[1]+",b[2]="+buffer[2]+",b[3]="+buffer[3]+",b[4]="+buffer[4]+",b[5]="+buffer[5]+",b[6]="+buffer[6]);
+            Log.i(TAG, "b[0]="+buffer[0]+",b[1]="+buffer[1]+",b[2]="+buffer[2]+",b[3]="+buffer[3]+",b[4]="+buffer[4]+",b[5]="+buffer[5]+",b[6]="+buffer[6]);
 
-                int pos= buffer[3] | buffer[4] << 8;
-                int speed= buffer[5] | buffer[6] << 8;
-                Log.i(TAG, "pos="+pos+",speed"+speed);
-
-                writeUartData(device, buffer);
-            } catch (IOException ex) {
-                String usbName = device.getName();
-                Log.i(TAG, "Error writing to usb " + usbName);
-            }
+            int pos= ((buffer[4] & 0xff) << 8) | (buffer[3] & 0xff);
+            int speed= ((buffer[6] & 0xff) << 8) | (buffer[5] & 0xff);
+            Log.i(TAG, "pos="+pos+",speed"+speed);
+            DxlHelper.writeUartData(mUsb, buffer);
         }
         else {
             Log.i(TAG, "Usb device is null");
         }
-    }
-
-    byte[] toBytes(int i)
-    {
-        byte[] result = new byte[2];
-
-        result[0] = (byte) i;
-        result[1] = (byte) (i >> 8);
-
-        return result;
-    }
-
-    int fromBytes(byte[] buffer)
-    {
-        int r = buffer[0] | buffer[1] << 8;
-        return r;
-    }
-
-    public void writeUartData(UartDevice uart, byte[] buffer) throws IOException {
-        int count = uart.write(buffer, buffer.length);
     }
 }
