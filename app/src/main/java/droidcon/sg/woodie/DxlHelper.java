@@ -60,10 +60,10 @@ public class DxlHelper {
         status.dxlid=buffer[1];
         status.isMoving=(buffer[2]==1);
 
-        int p1 = ((buffer[4] & 0xff) << 8) | ( buffer[3] & 0xff);
+        int p1 = ((buffer[4] & 0xFF) << 8) | ( buffer[3] & 0xFF);
         status.position = DxlVector.UnitToDegrees(p1);
 
-        Log.i(TAG,"dxl"+status.dxlid+" position:"+status.position);
+        Log.d(TAG,"dxl"+status.dxlid+" position:"+status.position + "(p1="+p1+")");
         return status;
     }
 

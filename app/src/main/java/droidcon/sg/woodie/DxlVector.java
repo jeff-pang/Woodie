@@ -8,7 +8,7 @@ public class DxlVector {
     public static String TAG="DxlVector";
     public int id;
     public int position;
-    public float power;
+    public int power;
     public int postWait;
     public int preWait;
 
@@ -35,13 +35,15 @@ public class DxlVector {
         return  power;
     }
 
-    public static int PowerToUnit(float percent)
+    public static int PowerToUnit(int percent)
     {
-        if(percent>1)
+        if(percent>100)
         {
-            percent=1;
+            percent=100;
         }
-        return (int)(percent * 1024);
+
+        float pc = (float)percent/100f;
+        return (int)(pc * 1024);
     }
 
     public static int DegreesToUnit(float degree) {
@@ -55,26 +57,38 @@ public class DxlVector {
             d=0;
         }
 
-        float constant = 3.4f;
-        float gp = 3.4f * d;
+        float constant = 3.41f;
+        float gp = 3.41f * d;
         return (int)gp;
     }
 
     public static int UnitToDegrees(int goal)
     {
-        float pc = (float)goal / 1023f;
-        float p = roundUp(pc * 300);
-        int degrees = (int)p - 150;
-        return degrees;
+        float g=(float)goal;
+        if(goal==65535)
+        {
+            g=0;
+        }
+
+        float pc = g / 1023f;
+        int degrees= (int)roundUp(pc * 300);
+
+        if(degrees!=0) {
+            return degrees - 150;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     private static float roundDown (float value) {
-        float v = Math.round(value - 0.5f);
+        float v = Math.round(value - 0.05f);
         return v;
     }
 
     private static float roundUp (float value) {
-        float v = Math.round(value + 0.5f);
+        float v = Math.round(value + 0.05f);
         return v;
     }
 }

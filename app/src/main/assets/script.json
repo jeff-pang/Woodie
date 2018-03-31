@@ -3,12 +3,18 @@
     "wavehello": [
       {
         "vectors":[
-          {"id":1,"position":50,"power":10,"postWait":0,"preWait":0},
-          {"id":11,"position":50,"power":10,"postWait":0,"preWait":0},
-          {"id":17,"position":50,"power":10,"postWait":0,"preWait":0},
-          {"id":2,"position":50,"power":10,"postWait":0,"preWait":0},
-          {"id":4,"position":50,"power":10,"postWait":0,"preWait":0}
-        ]}
+          {"id":1,"position":90,"power":40,"postWait":0,"preWait":0},
+          {"id":11,"position":0,"power":40,"postWait":0,"preWait":0},
+          {"id":17,"position":0,"power":40,"postWait":0,"preWait":0},
+          {"id":2,"position":0,"power":40,"postWait":0,"preWait":0},
+          {"id":4,"position":-90,"power":40,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":2,"position":145,"power":50,"postWait":0,"preWait":0}
+        ]
+      }
     ]
   }
 }

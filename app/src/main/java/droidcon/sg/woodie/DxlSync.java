@@ -8,7 +8,9 @@ import com.google.android.things.pio.UartDevice;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.subjects.PublishSubject;
 
 /**
  * Created by jeff on 27/3/18.
@@ -23,16 +25,25 @@ public class DxlSync {
     private Queue<DxlQuery> _queries;
     private DxlQuery _current;
 
+    private PublishSubject<DxlStatus> publisher = PublishSubject.create();
+
     public DxlSync(UartDevice device)
     {
         _queries=new LinkedList<>();
         _device=device;
 
-        DxlStatusBus bus = new DxlStatusBus(device);
+        DxlStatusBus statusBus = new DxlStatusBus(device);
 
-        bus.toObservable()
+        statusBus.toObservable()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(s-> {
+
+                    if(_current==null && !_queries.isEmpty())
+                    {
+                        _current = _queries.remove();
+                        Log.i(TAG, "pop dxl" + _current.getDxlId());
+                        getDxlInfo(_current.getDxlId());
+                    }
 
                     if(s.dxlid == 0)
                     {
@@ -41,43 +52,48 @@ public class DxlSync {
                     else
                     {
                         Log.i(TAG, "dxl" + s.dxlid + " position:" + s.position + " moving:" + s.isMoving);
+
+                        if(_current!=null)
+                        {
+                            Log.i(TAG, "current dxl" + _current.getDxlId() + " target position:" + _current.getTargetPos());
+                        }
+                        else
+                        {
+                            Log.i(TAG, "not current dxl");
+                        }
                     }
 
                     if(_current!=null)
                     {
-
-                        if(s.dxlid==_current.getDxlId())
+                        if(s.dxlid==_current.getDxlId() && !s.isMoving)
                         {
                             if(DxlHelper.approximatePosition(s.position,_current.getTargetPos()))
                             {
-                                if(!_queries.isEmpty())
-                                {
-                                    _current = _queries.remove();
-                                    byte[] buffer = {2};
-                                    DxlHelper.writeUartData(_device, buffer);
-                                }
-                                else
-                                {
-                                    _current=null;
-                                }
+                                _current = null;
+                                byte[] buffer = {2};
+                                DxlHelper.writeUartData(_device, buffer);
+                                publisher.onNext(s);
                             }
                         }
 
-                        Log.i(TAG, "getting info for dxl" + _current.getDxlId());
-                        getDxlInfo(_current.getDxlId());
                     }
 
-                    SystemClock.sleep(100);
+                    SystemClock.sleep(10);
                 });
+    }
+
+    public Observable<DxlStatus> toObservable() {
+        return publisher;
     }
 
     public void AddQueue(DxlQuery query)
     {
         _queries.add(query);
 
-        if(_current==null)
+        if(_current==null && !_queries.isEmpty())
         {
-            _current=_queries.remove();
+            _current = _queries.remove();
+            Log.i(TAG, "pop dxl" + _current.getDxlId());
         }
 
         Log.i(TAG, "dxl"+query.getDxlId()+" query added");

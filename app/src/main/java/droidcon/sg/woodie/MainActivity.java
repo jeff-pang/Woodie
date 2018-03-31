@@ -2,6 +2,7 @@ package droidcon.sg.woodie;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.android.things.pio.PeripheralManager;
@@ -43,6 +44,7 @@ public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
 
     DxlSync mSync;
+    int frameNo = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,22 +59,46 @@ public class MainActivity extends Activity {
             Log.i(TAG,"Running script 'wavehello'");
             ActionFrame[] frames = mScripts.scripts.get("wavehello");
 
-            DxlRunner runner = new DxlRunner(mDevice,frames[0]);
-            new Thread(runner).start();
+            Log.i(TAG, "process frame "+frameNo);
+            processFrame(frames[frameNo]);
+            FrameSequence seq = new FrameSequence(mSync,frames[frameNo]);
 
-            DxlVector[] vectors=frames[0].vectors;
+            seq.toObservable().subscribe(s-> {
+                if(frameNo<frames.length) {
 
-            if(vectors!=null) {
-                for (DxlVector dxl : vectors) {
-                    DxlQuery q=new DxlQuery(dxl.id,dxl.position);
-                    mSync.AddQueue(q);
+                    frameNo++;
+                    seq.Reset(frames[frameNo]);
+                    Log.i(TAG, "process frame "+frameNo);
+                    processFrame(frames[frameNo]);
                 }
-            }
+            });
         }
         else
         {
             Log.i(TAG,"Script is null");
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+    }
+
+
+    void processFrame(ActionFrame frame) {
+
+        DxlRunner runner = new DxlRunner(mDevice,frame);
+        new Thread(runner).start();
+
+        DxlVector[] vectors = frame.vectors;
+        if (vectors != null) {
+            for (DxlVector dxl : vectors) {
+                DxlQuery q = new DxlQuery(dxl.id, dxl.position);
+                mSync.AddQueue(q);
+            }
+        }
+
     }
 
     Scripts loadJSONFromAsset() {

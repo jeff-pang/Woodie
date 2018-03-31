@@ -54,13 +54,41 @@ public class DxlRunner implements Runnable{
         if(vectors!=null) {
             for (DxlVector dxl : vectors) {
 
-                int powerUnit = DxlVector.PowerToUnit(dxl.power);
-                int posUnit = DxlVector.DegreesToUnit(dxl.position);
+                DxlVector v=applyLimits(dxl);
+                int powerUnit = DxlVector.PowerToUnit(v.power);
+                int posUnit = DxlVector.DegreesToUnit(v.position);
                 moveDxl(dxl.id, posUnit, powerUnit);
-                SystemClock.sleep(100);
-                SystemClock.sleep(100);
+                SystemClock.sleep(10);
             }
         }
+    }
+
+    DxlVector applyLimits(DxlVector vector)
+    {
+        if(vector.position>150)
+        {
+            vector.position = 150;
+        }
+
+        if(vector.position<-150)
+        {
+            vector.position = -150;
+        }
+
+        if(vector.id == 1 || vector.id == 4)
+        {
+            if(vector.position>100)
+            {
+                vector.position=100;
+            }
+            else if(vector.position<-100)
+            {
+                vector.position=-100;
+            }
+        }
+
+
+        return  vector;
     }
 
     void moveDxl(int id,int positionUnit,int powerUnit)
