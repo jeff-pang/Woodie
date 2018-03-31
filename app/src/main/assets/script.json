@@ -12,7 +12,27 @@
       },
       {
         "vectors":[
-          {"id":2,"position":145,"power":50,"postWait":0,"preWait":0}
+          {"id":2,"position":145,"power":30,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":4,"position":-50,"power":30,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":4,"position":-100,"power":30,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":4,"position":-50,"power":30,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":4,"position":-100,"power":30,"postWait":0,"preWait":0}
         ]
       }
     ]
