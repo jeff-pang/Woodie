@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="droidcon.sg.woodiemobile.MainActivity">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/btnHello"
+            style="@android:style/Widget.Material.Light.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hello"
+            android:textAppearance="@android:style/TextAppearance.Material.Widget.Button"
+            tools:layout_editor_absoluteX="132dp"
+            tools:layout_editor_absoluteY="88dp" />
+
+        <Button
+            android:id="@+id/btnWorkout"
+            style="@android:style/Widget.Material.Light.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Workout"
+            android:textAppearance="@android:style/TextAppearance.Material.Widget.Button"
+            tools:layout_editor_absoluteX="132dp"
+            tools:layout_editor_absoluteY="88dp" />
+
+        <Button
+            android:id="@+id/btnMirror"
+            style="@android:style/Widget.Material.Light.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mirror"
+            android:textAppearance="@android:style/TextAppearance.Material.Widget.Button"
+            tools:layout_editor_absoluteX="132dp"
+            tools:layout_editor_absoluteY="88dp" />
+
+        <Button
+            android:id="@+id/btnReset"
+            style="@android:style/Widget.Material.Light.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reset"
+            android:textAppearance="@android:style/TextAppearance.Material.Widget.Button"
+            tools:layout_editor_absoluteX="132dp"
+            tools:layout_editor_absoluteY="88dp" />
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

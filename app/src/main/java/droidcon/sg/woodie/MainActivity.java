@@ -7,6 +7,12 @@ import android.util.Log;
 
 import com.google.android.things.pio.PeripheralManager;
 import com.google.android.things.pio.UartDevice;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonElement;
@@ -39,9 +45,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
  */
 public class MainActivity extends Activity {
 
+    private static final String TAG = "MainActivity";
+
     UartDevice mDevice;
     Scripts mScripts;
-    private static final String TAG = "MainActivity";
+
+    private FirebaseDatabase mDatabase;
+    private FirebaseStorage mStorage;
 
     DxlSync mSync;
     int frameNo = 0;
@@ -53,7 +63,26 @@ public class MainActivity extends Activity {
         mScripts=loadJSONFromAsset();
 
         mDevice = initialiseUsb();
+
+        mDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference ref = mDatabase.getReference().child("commands");
+
+        // Attach a listener to read the data at our posts reference
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                RemoteCommand command = dataSnapshot.getValue(RemoteCommand.class);
+               Log.i(TAG,"Command:"+command.getCommandName()+ " Value:"+command.getCommandValue());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(TAG,"The read failed: " + databaseError.getCode());
+            }
+        });
+
         mSync=new DxlSync(mDevice);
+
         if(mScripts !=null && mScripts.scripts!=null)
         {
             Log.i(TAG,"Running script 'wavehello'");

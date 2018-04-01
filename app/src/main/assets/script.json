@@ -1,13 +1,23 @@
 {
   "scripts": {
+    "reset": [
+      {
+        "vectors":[
+          {"id":1,"position":90,"power":40,"postWait":0,"preWait":0},
+          {"id":4,"position":-90,"power":40,"postWait":0,"preWait":0},
+          {"id":11,"position":0,"power":40,"postWait":0,"preWait":0},
+          {"id":17,"position":0,"power":40,"postWait":0,"preWait":0},
+          {"id":2,"position":0,"power":40,"postWait":0,"preWait":0}
+        ]
+      }],
     "wavehello": [
       {
         "vectors":[
           {"id":1,"position":90,"power":40,"postWait":0,"preWait":0},
+          {"id":4,"position":-90,"power":40,"postWait":0,"preWait":0},
           {"id":11,"position":0,"power":40,"postWait":0,"preWait":0},
           {"id":17,"position":0,"power":40,"postWait":0,"preWait":0},
-          {"id":2,"position":0,"power":40,"postWait":0,"preWait":0},
-          {"id":4,"position":-90,"power":40,"postWait":0,"preWait":0}
+          {"id":2,"position":0,"power":40,"postWait":0,"preWait":0}
         ]
       },
       {
@@ -33,6 +43,49 @@
       {
         "vectors":[
           {"id":4,"position":-100,"power":30,"postWait":0,"preWait":0}
+        ]
+      }
+    ],
+    "exercise":[
+      {
+        "vectors":[
+          {"id":1,"position":90,"power":40,"postWait":0,"preWait":0},
+          {"id":4,"position":-90,"power":40,"postWait":0,"preWait":0},
+          {"id":11,"position":0,"power":40,"postWait":0,"preWait":0},
+          {"id":17,"position":0,"power":40,"postWait":0,"preWait":0},
+          {"id":2,"position":0,"power":40,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":2,"position":145,"power":60,"postWait":0,"preWait":0},
+          {"id":11,"position":-145,"power":60,"postWait":0,"preWait":0},
+          {"id":1,"position":0,"power":60,"postWait":0,"preWait":0},
+          {"id":4,"position":0,"power":60,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":1,"position":-100,"power":60,"postWait":0,"preWait":0},
+          {"id":4,"position":100,"power":60,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":1,"position":0,"power":30,"postWait":0,"preWait":0},
+          {"id":4,"position":0,"power":30,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":1,"position":-100,"power":60,"postWait":0,"preWait":0},
+          {"id":4,"position":100,"power":60,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":2,"position":145,"power":60,"postWait":0,"preWait":0},
+          {"id":11,"position":-10,"power":60,"postWait":0,"preWait":0}
         ]
       }
     ]
