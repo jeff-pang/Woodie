@@ -4,7 +4,6 @@
 
 Dynamixel Dxl(DXL_BUS_SERIAL);
 
-
 byte pollBuffer[3];
 boolean pollStart;
 

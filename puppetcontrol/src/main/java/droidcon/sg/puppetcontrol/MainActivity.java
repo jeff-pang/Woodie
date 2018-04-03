@@ -1,8 +1,7 @@
-package droidcon.sg.woodie;
+package droidcon.sg.puppetcontrol;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.android.things.pio.PeripheralManager;
@@ -12,14 +11,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonElement;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,65 +42,47 @@ public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
 
     UartDevice mDevice;
-    Scripts mScripts;
-
     private FirebaseDatabase mDatabase;
-    private FirebaseStorage mStorage;
 
-    DxlSync mSync;
-    int frameNo = 0;
+    HashMap<Integer,DxlStatus> lastStatuses=new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mScripts=loadJSONFromAsset();
+        setContentView(R.layout.activity_main);
 
         mDevice = initialiseUsb();
-
         mDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference ref = mDatabase.getReference().child("commands");
 
-        // Attach a listener to read the data at our posts reference
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                RemoteCommand command = dataSnapshot.getValue(RemoteCommand.class);
-               Log.i(TAG,"Command:"+command.getCommandName()+ " Value:"+command.getCommandValue());
-            }
+        final DatabaseReference puppet = mDatabase.getReference("puppet");
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.i(TAG,"The read failed: " + databaseError.getCode());
-            }
-        });
+        DxlStatusBus statusBus = new DxlStatusBus(mDevice);
 
-        mSync=new DxlSync(mDevice);
+        statusBus.toObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(statuses-> {
+                    for (DxlStatus status : statuses)
+                    {
+                        if(!lastStatuses.containsKey(status.dxlid))
+                        {
+                            lastStatuses.put(status.dxlid,status);
+                            puppet.child("dxl"+status.dxlid).setValue(status.position);
+                        }
+                        else
+                        {
+                            DxlStatus lastStatus=lastStatuses.get(status.dxlid);
+                            if(lastStatus.position != status.position)
+                            {
+                                puppet.child("dxl"+status.dxlid).setValue(status.position);
+                                lastStatuses.put(status.dxlid,status);
 
-        if(mScripts !=null && mScripts.scripts!=null)
-        {
-            Log.i(TAG,"Running script 'wavehello'");
-            ActionFrame[] frames = mScripts.scripts.get("wavehello");
+                                Log.i(TAG,"Setting Firebase puppet dxl:"+status.dxlid+" value:"+status.position);
+                            }
+                        }
 
-            Log.i(TAG, "process frame "+frameNo);
-            processFrame(frames[frameNo]);
-            FrameSequence seq = new FrameSequence(mSync,frames[frameNo]);
-
-            seq.toObservable().subscribe(s-> {
-                if(frameNo<frames.length) {
-
-                    frameNo++;
-                    seq.Reset(frames[frameNo]);
-                    Log.i(TAG, "process frame "+frameNo);
-                    processFrame(frames[frameNo]);
-
-                }
-            });
-        }
-        else
-        {
-            Log.i(TAG,"Script is null");
-        }
+                        Log.d(TAG, "dxl" + status.dxlid + " position:" + status.position);
+                    }
+                });
     }
 
     @Override
@@ -116,48 +91,6 @@ public class MainActivity extends Activity {
         Log.d(TAG, "onDestroy");
     }
 
-
-    void processFrame(ActionFrame frame) {
-
-        DxlRunner runner = new DxlRunner(mDevice,frame);
-        new Thread(runner).start();
-
-        DxlVector[] vectors = frame.vectors;
-        if (vectors != null) {
-            for (DxlVector dxl : vectors) {
-                DxlQuery q = new DxlQuery(dxl.id, dxl.position);
-                mSync.AddQueue(q);
-            }
-        }
-
-    }
-
-    Scripts loadJSONFromAsset() {
-        String json = null;
-        try {
-            InputStream is = getAssets().open("script.json");
-
-            int size = is.available();
-            byte[] buffer = new byte[size];
-
-            is.read(buffer);
-
-            is.close();
-
-            json = new String(buffer, "UTF-8");
-
-            JsonParser parser = new JsonParser();
-            JsonElement mJson =  parser.parse(json);
-            Gson gson = new Gson();
-
-            Scripts object = gson.fromJson(mJson,Scripts.class);
-            return object;
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
 
     UartDevice initialiseUsb()
     {
@@ -200,4 +133,6 @@ public class MainActivity extends Activity {
         uart.setParity(UartDevice.PARITY_NONE);
         uart.setStopBits(1);
     }
+
+
 }

@@ -1,1 +1,1 @@
-include ':app', ':woodiemobile'
+include ':app', ':woodiemobile', ':puppetcontrol'
