@@ -53,11 +53,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button btnMirror = findViewById(R.id.btnMirror);
-        btnMirror.setOnClickListener(new View.OnClickListener() {
+        Button btnPuppet = findViewById(R.id.btnPuppet);
+        btnPuppet.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Do something in response to button click
-                RemoteCommand newCommand=new RemoteCommand("Mirror","");
+                RemoteCommand newCommand=new RemoteCommand("Puppet","");
                 command.setValue(newCommand);
                 Log.i(TAG,"Setting Firebase Value command:"+newCommand.getCommandName()+" commandValue:"+newCommand.getCommandValue());
             }

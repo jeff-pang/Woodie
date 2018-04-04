@@ -27,7 +27,8 @@
       },
       {
         "vectors":[
-          {"id":4,"position":-50,"power":30,"postWait":0,"preWait":0}
+          {"id":4,"position":-50,"power":30,"postWait":0,"preWait":0},
+          {"id":17,"position":-15,"power":30,"postWait":0,"preWait":0}
         ]
       },
       {
@@ -42,11 +43,30 @@
       },
       {
         "vectors":[
+          {"id":4,"position":-100,"power":30,"postWait":0,"preWait":0},
+          {"id":17,"position":15,"power":30,"postWait":0,"preWait":0}
+        ]
+      },
+
+      {
+        "vectors":[
+          {"id":4,"position":-50,"power":30,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
           {"id":4,"position":-100,"power":30,"postWait":0,"preWait":0}
+        ]
+      },
+      {
+        "vectors":[
+          {"id":4,"position":-90,"power":30,"postWait":0,"preWait":0},
+          {"id":2,"position":0,"power":30,"postWait":0,"preWait":0},
+          {"id":17,"position":0,"power":30,"postWait":0,"preWait":0}
         ]
       }
     ],
-    "exercise":[
+    "workout":[
       {
         "vectors":[
           {"id":1,"position":90,"power":40,"postWait":0,"preWait":0},

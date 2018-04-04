@@ -40,11 +40,11 @@
             tools:layout_editor_absoluteY="88dp" />
 
         <Button
-            android:id="@+id/btnMirror"
+            android:id="@+id/btnPuppet"
             style="@android:style/Widget.Material.Light.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Mirror"
+            android:text="Puppet"
             android:textAppearance="@android:style/TextAppearance.Material.Widget.Button"
             tools:layout_editor_absoluteX="132dp"
             tools:layout_editor_absoluteY="88dp" />

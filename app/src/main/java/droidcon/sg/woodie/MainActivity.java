@@ -57,6 +57,11 @@ public class MainActivity extends Activity {
     DxlSync mSync;
     int frameNo = 0;
 
+    int mode=0;
+
+    HashMap<Integer,Integer> moveCount=new HashMap<>();
+    HashMap<Integer,Integer> lastPosition=new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,15 +70,47 @@ public class MainActivity extends Activity {
 
         mDevice = initialiseUsb();
 
+        moveCount.put(3,0);
+        moveCount.put(6,0);
+        moveCount.put(9,0);
+        moveCount.put(13,0);
+        moveCount.put(15,0);
+
+        lastPosition.put(3,0);
+        lastPosition.put(6,0);
+        lastPosition.put(9,0);
+        lastPosition.put(13,0);
+        lastPosition.put(15,0);
+
         mDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference ref = mDatabase.getReference().child("commands");
+        DatabaseReference refCommand = mDatabase.getReference().child("command");
 
         // Attach a listener to read the data at our posts reference
-        ref.addValueEventListener(new ValueEventListener() {
+        refCommand.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 RemoteCommand command = dataSnapshot.getValue(RemoteCommand.class);
-               Log.i(TAG,"Command:"+command.getCommandName()+ " Value:"+command.getCommandValue());
+                Log.i(TAG,"Command:"+command.getCommandName()+ " Value:"+command.getCommandValue());
+
+                if(command.getCommandName().toLowerCase().equals("script"))
+                {
+                    mode=0;
+                    if(mScripts !=null && mScripts.scripts!=null)
+                    {
+                        if(mScripts.scripts.containsKey(command.getCommandValue()))
+                        {
+                            startAction(command.getCommandValue());
+                        }
+                        else
+                        {  Log.i(TAG,"Does not contain script name "+command.getCommandValue());
+
+                        }
+                    }
+                }
+                else if(command.getCommandName().toLowerCase().equals("puppet"))
+                {
+                    mode=1;
+                }
             }
 
             @Override
@@ -84,10 +121,71 @@ public class MainActivity extends Activity {
 
         mSync=new DxlSync(mDevice);
 
+        setupPuppetMotor(3,4);
+        setupPuppetMotor(13,2);
+        setupPuppetMotor(6,11);
+        setupPuppetMotor(13,2);
+        setupPuppetMotor(15,1);
+        setupPuppetMotor(9,17);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+    }
+
+    private void setupPuppetMotor(int sourceDxlId,int targetDxlId)
+    {
+        DatabaseReference refPuppetDxl = mDatabase.getReference().child("puppet").child("dxl"+sourceDxlId);
+
+        // Attach a listener to read the data at our posts reference
+        refPuppetDxl.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if(mode==1) {
+                    DxlRunner runner = new DxlRunner(mDevice);
+                    Integer value = dataSnapshot.getValue(Integer.class);
+
+                    int lastPos = lastPosition.get(sourceDxlId);
+                    int dP = Math.abs(lastPos - value);
+                    int mvCnt=  moveCount.get(sourceDxlId);
+
+                    if(mvCnt>10 || dP>1) {
+
+                        DxlVector vector = new DxlVector();
+                        vector.position = value;
+                        vector.id = targetDxlId;
+                        vector.power = 10;
+                        runner.runVector(vector);
+
+                        mvCnt = 0;
+                    }
+                    else
+                    {
+                        mvCnt++;
+                    }
+
+                    lastPosition.put(sourceDxlId,value);
+                    moveCount.put(sourceDxlId,mvCnt);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i(TAG,"The read failed: " + databaseError.getCode());
+            }
+        });
+    }
+
+    void startAction(String name)
+    {
         if(mScripts !=null && mScripts.scripts!=null)
         {
-            Log.i(TAG,"Running script 'wavehello'");
-            ActionFrame[] frames = mScripts.scripts.get("wavehello");
+            Log.i(TAG,"Running script "+name);
+            ActionFrame[] frames = mScripts.scripts.get(name);
 
             Log.i(TAG, "process frame "+frameNo);
             processFrame(frames[frameNo]);
@@ -110,26 +208,20 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-    }
-
-
     void processFrame(ActionFrame frame) {
 
-        DxlRunner runner = new DxlRunner(mDevice,frame);
-        new Thread(runner).start();
+        if(mode==0) {
+            DxlRunner runner = new DxlRunner(mDevice, frame);
+            new Thread(runner).start();
 
-        DxlVector[] vectors = frame.vectors;
-        if (vectors != null) {
-            for (DxlVector dxl : vectors) {
-                DxlQuery q = new DxlQuery(dxl.id, dxl.position);
-                mSync.AddQueue(q);
+            DxlVector[] vectors = frame.vectors;
+            if (vectors != null) {
+                for (DxlVector dxl : vectors) {
+                    DxlQuery q = new DxlQuery(dxl.id, dxl.position);
+                    mSync.AddQueue(q);
+                }
             }
         }
-
     }
 
     Scripts loadJSONFromAsset() {

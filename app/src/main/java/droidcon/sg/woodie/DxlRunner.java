@@ -26,6 +26,11 @@ public class DxlRunner implements Runnable{
     UartDevice mUsb;
     ActionFrame mFrame;
 
+    DxlRunner(UartDevice usbDevice) {
+
+        mUsb=usbDevice;
+    }
+
     DxlRunner(UartDevice usbDevice,ActionFrame frame) {
 
         mUsb=usbDevice;
@@ -50,17 +55,21 @@ public class DxlRunner implements Runnable{
         }
     }
 
-    void runVectors(DxlVector[] vectors) {
+    public void runVectors(DxlVector[] vectors) {
         if(vectors!=null) {
-            for (DxlVector dxl : vectors) {
-
-                DxlVector v=applyLimits(dxl);
-                int powerUnit = DxlVector.PowerToUnit(v.power);
-                int posUnit = DxlVector.DegreesToUnit(v.position);
-                moveDxl(dxl.id, posUnit, powerUnit);
-                SystemClock.sleep(10);
+            for (DxlVector dxlV : vectors) {
+                runVector(dxlV);
             }
         }
+    }
+
+    public void runVector(DxlVector vector)
+    {
+        DxlVector v=applyLimits(vector);
+        int powerUnit = DxlVector.PowerToUnit(v.power);
+        int posUnit = DxlVector.DegreesToUnit(v.position);
+        moveDxl(vector.id, posUnit, powerUnit);
+        SystemClock.sleep(10);
     }
 
     DxlVector applyLimits(DxlVector vector)
