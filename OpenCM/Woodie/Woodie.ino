@@ -31,7 +31,7 @@ void loop() {
   getDxlInfo(pollBuffer,result);    
   SerialUSB.write(result,5);
   
-  delay(100);
+  delay(200);
 }
 
 void usbInterrupt(byte* buffer, byte nCount){
